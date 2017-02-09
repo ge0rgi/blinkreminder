@@ -7,7 +7,10 @@
   "description": "Reminds the user to blink and look away from the monitor regularly to prevent eye stain and dry eye.",
 
   "background": {
-    "scripts": ["main.js"]
+    "scripts": ["options.js", "main.js"]
   },
-  "permissions": ["idle", "alarms", "notifications"]
+  "permissions": ["idle", "alarms", "notifications", "storage"],
+  "options_ui": {
+    "page": "options.html"
+  }
 }
