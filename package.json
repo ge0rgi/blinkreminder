@@ -12,5 +12,8 @@
   },
   "author": "Georgi Georgiev",
   "license": "MPL-2.0",
-  "homepage": "https://bitbucket.org/ge0rgi/blinkreminder#readme"
+  "homepage": "https://bitbucket.org/ge0rgi/blinkreminder#readme",
+  "devDependencies": {
+    "@types/chrome": "0.0.39"
+  }
 }
