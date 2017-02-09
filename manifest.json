@@ -9,5 +9,5 @@
   "background": {
     "scripts": ["main.js"]
   },
-  "permissions": ["idle"]
+  "permissions": ["idle", "alarms", "notifications"]
 }
