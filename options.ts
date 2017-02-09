@@ -6,7 +6,7 @@ interface BlinkReminderSettings {
   breakDuration: number;
 }
 
-interface GetSettingsCallback{
+interface GetSettingsCallback {
   (settings: BlinkReminderSettings): void
 }
 
@@ -28,9 +28,9 @@ function optionsLoaded (settting: BlinkReminderSettings) {
 function saveOptions () {
   console.log("saving settings");
   let newSettings: BlinkReminderSettings = {
-    remindInterval: document.querySelector("#remindInterval").value,
-    breakInterval: document.querySelector("#breakInterval").value,
-    breakDuration:   document.querySelector("#breakDuration").value
+    remindInterval: parseInt (document.querySelector("#remindInterval").value, 10),
+    breakInterval: parseInt (document.querySelector("#breakInterval").value, 10),
+    breakDuration:  parseInt (document.querySelector("#breakDuration").value, 10)
   }
   chrome.storage.local.set(newSettings, settingSavedCallback);
 }

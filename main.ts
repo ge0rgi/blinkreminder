@@ -7,9 +7,11 @@ class BlinkReminder {
 
   init (settings: BlinkReminderSettings): void {
       chrome.idle.setDetectionInterval(60);
+      chrome.storage.onChanged.addListener(this.onSettingsChanged);
       chrome.idle.onStateChanged.addListener(this.onStateChanged);
       chrome.alarms.create("reminder_alarm", {periodInMinutes: settings.remindInterval});
       chrome.alarms.onAlarm.addListener(this.onAlarmFired);
+
   }
   onStateChanged (newState: string): void {
     let now: Date = new Date();
@@ -39,6 +41,11 @@ class BlinkReminder {
         console.error("Error loading settings ".concat(chrome.runtime.lastError.message));
       }
     });
+  }
+  onSettingsChanged (change: {[key: string]: chrome.storage.StorageChange} , area: string): void {
+    blinkReminder.settings.remindInterval = change["remindInterval"].newValue;
+    blinkReminder.settings.breakInterval = change["breakInterval"].newValue;
+    blinkReminder.settings.breakDuration = change["breakDuration"].newValue;
   }
 }
 
