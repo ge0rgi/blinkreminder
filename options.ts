@@ -20,17 +20,17 @@ interface GetSettingsCallback {
 }
 
 function optionsLoaded (settting: BlinkReminderSettings) {
-  document.querySelector("#remindInterval").value = settting.remindInterval;
-  document.querySelector("#breakInterval").value = settting.breakInterval;
-  document.querySelector("#breakDuration").value = settting.breakDuration;
+  (<HTMLInputElement>document.querySelector("#remindInterval")).value = settting.remindInterval.toString();
+  (<HTMLInputElement>document.querySelector("#breakInterval")).value = settting.breakInterval.toString();
+  (<HTMLInputElement>document.querySelector("#breakDuration")).value = settting.breakDuration.toString();
 }
 
 function saveOptions () {
   console.log("saving settings");
   let newSettings: BlinkReminderSettings = {
-    remindInterval: parseInt (document.querySelector("#remindInterval").value, 10),
-    breakInterval: parseInt (document.querySelector("#breakInterval").value, 10),
-    breakDuration:  parseInt (document.querySelector("#breakDuration").value, 10)
+    remindInterval: parseInt ((<HTMLInputElement>document.querySelector("#remindInterval")).value, 10),
+    breakInterval: parseInt ((<HTMLInputElement>document.querySelector("#breakInterval")).value, 10),
+    breakDuration:  parseInt ((<HTMLInputElement>document.querySelector("#breakDuration")).value, 10)
   }
   chrome.storage.local.set(newSettings, settingSavedCallback);
 }
