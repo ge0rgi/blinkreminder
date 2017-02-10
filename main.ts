@@ -5,55 +5,52 @@ class BlinkReminder {
 
   settings: BlinkReminderSettings = null;
   timeWithoutBreak: number = 0;
-  inactiveSince: number = 0;
+  lastStateChangeTimestamp: number = 0;
 
 
   init (settings: BlinkReminderSettings): void {
       chrome.idle.setDetectionInterval(60);
       chrome.storage.onChanged.addListener(this.onSettingsChanged);
       chrome.idle.onStateChanged.addListener(this.onStateChanged);
-      chrome.alarms.create("reminder_alarm", {periodInMinutes: settings.remindInterval});
       chrome.alarms.onAlarm.addListener(this.onAlarmFired);
       chrome.browserAction.onClicked.addListener(() => {
         chrome.runtime.openOptionsPage();
       });
-
+      this.lastStateChangeTimestamp = Date.now();
+      chrome.alarms.create("reminder_alarm", {periodInMinutes: settings.remindInterval});
+      console.log("addon loaded");
   }
   onStateChanged (newState: string): void {
     let now: Date = new Date();
     console.log(blinkReminder.getTimeForLogging().concat(": state change, new state ", newState));
     if (newState != "active"){
-      blinkReminder.inactiveSince = now.getTime();
+      blinkReminder.timeWithoutBreak += Math.round((now.getTime() - blinkReminder.lastStateChangeTimestamp) / (60 * 1000));
       chrome.alarms.clearAll();
     } else if (newState == "active") {
-      let diff: number = blinkReminder.inactiveSince - now.getTime();
-      if (diff >= 10*60*1000){
-        console.log(blinkReminder.getTimeForLogging().concat(": away for ", (diff / 1000).toString(), "s reseting break timer"));
+      let diff: number = now.getTime() - blinkReminder.lastStateChangeTimestamp;
+      let minutes: number = Math.round(diff / (1000 * 60));
+      if (minutes >= (blinkReminder.settings.breakDuration-1)){ // because 1 minute passes bewfore we go in idle srare
+        console.log(blinkReminder.getTimeForLogging().concat(": away for ", (diff / (1000 * 60)).toString(), "m reseting break timer"));
         blinkReminder.timeWithoutBreak = 0;
+      } else {
+        console.log(blinkReminder.getTimeForLogging().concat(": short break for ", minutes.toString(), " minutes"));
+        blinkReminder.timeWithoutBreak -= minutes;
       }
       chrome.alarms.create("reminder_alarm", {periodInMinutes: blinkReminder.settings.remindInterval});
     }
+    blinkReminder.lastStateChangeTimestamp = now.getTime();
   }
   onAlarmFired (alarm: chrome.alarms.Alarm): void {
-    if (alarm.name == "reminder_alarm"){
-      blinkReminder.timeWithoutBreak += blinkReminder.settings.remindInterval;
-      if (blinkReminder.timeWithoutBreak >= blinkReminder.settings.breakInterval){
+    blinkReminder.timeWithoutBreak += blinkReminder.settings.remindInterval;
+    if (blinkReminder.timeWithoutBreak >= blinkReminder.settings.breakInterval){
         console.log(blinkReminder.getTimeForLogging().concat(": long break, without break since ",  blinkReminder.timeWithoutBreak.toString(), " minutes" ));
         chrome.notifications.create("look_away", {type: "basic", title: "Blink Reminder", iconUrl:"icons/eye-open64.png",
                                     message: "Take a break for ".concat(blinkReminder.settings.breakDuration.toString(), " minutes")});
-        chrome.alarms.clear("reminder_alarm");
-        chrome.alarms.create("break_end_alarm", {delayInMinutes: blinkReminder.settings.breakDuration});
-      } else {
-          console.log(blinkReminder.getTimeForLogging().concat(": short break, without break since ",  blinkReminder.timeWithoutBreak.toString(), " minutes" ));
-          chrome.notifications.create("look_away", {type: "basic", title: "Blink Reminder", iconUrl:"icons/eye-open64.png",
-                                      message: "Look away from the monitor."});
+    } else {
+        console.log(blinkReminder.getTimeForLogging().concat(": short break, without break since ",  blinkReminder.timeWithoutBreak.toString(), " minutes" ));
+        chrome.notifications.create("look_away", {type: "basic", title: "Blink Reminder", iconUrl:"icons/eye-open64.png",
+                                    message: "Look away from the monitor."});
       }
-    } else if (alarm.name == "break_end_alarm"){
-      console.log(blinkReminder.getTimeForLogging().concat(": end of long break"));
-      blinkReminder.timeWithoutBreak = 0;
-      chrome.alarms.create("reminder_alarm", {periodInMinutes: blinkReminder.settings.remindInterval});
-    }
-
   }
   loadSettings (): void {
     chrome.storage.local.get({
