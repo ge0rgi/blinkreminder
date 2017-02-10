@@ -14,7 +14,10 @@ class BlinkReminder {
       chrome.idle.onStateChanged.addListener(this.onStateChanged);
       chrome.alarms.create("reminder_alarm", {periodInMinutes: settings.remindInterval});
       chrome.alarms.onAlarm.addListener(this.onAlarmFired);
-      
+      chrome.browserAction.onClicked.addListener(() => {
+        chrome.runtime.openOptionsPage();
+      });
+
   }
   onStateChanged (newState: string): void {
     let now: Date = new Date();
