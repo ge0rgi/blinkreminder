@@ -14,7 +14,7 @@ class BlinkReminder {
       chrome.idle.onStateChanged.addListener(this.onStateChanged);
       chrome.alarms.create("reminder_alarm", {periodInMinutes: settings.remindInterval});
       chrome.alarms.onAlarm.addListener(this.onAlarmFired);
-
+      
   }
   onStateChanged (newState: string): void {
     let now: Date = new Date();
@@ -36,12 +36,14 @@ class BlinkReminder {
       blinkReminder.timeWithoutBreak += blinkReminder.settings.remindInterval;
       if (blinkReminder.timeWithoutBreak >= blinkReminder.settings.breakInterval){
         console.log(blinkReminder.getTimeForLogging().concat(": long break, without break since ",  blinkReminder.timeWithoutBreak.toString(), " minutes" ));
-        chrome.notifications.create("look_away", {type: "basic", title: "Blink Reminder", message: "Take a break for ".concat(blinkReminder.settings.breakDuration.toString(), " minutes")});
+        chrome.notifications.create("look_away", {type: "basic", title: "Blink Reminder", iconUrl:"icons/eye-open64.png",
+                                    message: "Take a break for ".concat(blinkReminder.settings.breakDuration.toString(), " minutes")});
         chrome.alarms.clear("reminder_alarm");
         chrome.alarms.create("break_end_alarm", {delayInMinutes: blinkReminder.settings.breakDuration});
       } else {
           console.log(blinkReminder.getTimeForLogging().concat(": short break, without break since ",  blinkReminder.timeWithoutBreak.toString(), " minutes" ));
-          chrome.notifications.create("look_away", {type: "basic", title: "Blink Reminder", message: "Look away from the monitor."});
+          chrome.notifications.create("look_away", {type: "basic", title: "Blink Reminder", iconUrl:"icons/eye-open64.png",
+                                      message: "Look away from the monitor."});
       }
     } else if (alarm.name == "break_end_alarm"){
       console.log(blinkReminder.getTimeForLogging().concat(": end of long break"));
