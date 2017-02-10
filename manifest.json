@@ -12,5 +12,11 @@
   "permissions": ["idle", "alarms", "notifications", "storage"],
   "options_ui": {
     "page": "options.html"
+  },
+  "icons":{
+    "32": "icons/eye-open32.png",
+    "64": "icons/eye-open64.png",
+    "128": "icons/eye-open128.png",
+    "256": "icons/eye-open256.png"
   }
 }
