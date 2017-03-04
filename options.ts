@@ -4,6 +4,8 @@ interface BlinkReminderSettings {
   remindInterval: number;
   breakInterval: number;
   breakDuration: number;
+  notificationOnShortBreak: boolean;
+  notificationOnLongBreak: boolean;
 }
 
 interface GetSettingsCallback {
@@ -15,22 +17,29 @@ interface GetSettingsCallback {
   chrome.storage.local.get({
     remindInterval: 20,
     breakInterval: 60,
-    breakDuration: 10
+    breakDuration: 10,
+    notificationOnShortBreak: true,
+    notificationOnLongBreak: true
   }, optionsLoaded)
 }
 
-function optionsLoaded (settting: BlinkReminderSettings) {
-  (<HTMLInputElement>document.querySelector("#remindInterval")).value = settting.remindInterval.toString();
-  (<HTMLInputElement>document.querySelector("#breakInterval")).value = settting.breakInterval.toString();
-  (<HTMLInputElement>document.querySelector("#breakDuration")).value = settting.breakDuration.toString();
+function optionsLoaded (settings: BlinkReminderSettings) {
+  (document.querySelector("#remindInterval") as HTMLInputElement).value = settings.remindInterval.toString();
+  (document.querySelector("#breakInterval") as HTMLInputElement).value = settings.breakInterval.toString();
+  (document.querySelector("#breakDuration") as HTMLInputElement).value = settings.breakDuration.toString();
+  (document.querySelector("#soundOnShortBreak") as HTMLInputElement).checked = settings.notificationOnShortBreak;
+  (document.querySelector("#soundOnLongBreak") as HTMLInputElement).checked = settings.notificationOnLongBreak;
+  document.querySelector("#settingsForm").addEventListener("submit", saveOptions);
 }
 
 function saveOptions () {
   console.log("saving settings");
   let newSettings: BlinkReminderSettings = {
-    remindInterval: parseInt ((<HTMLInputElement>document.querySelector("#remindInterval")).value, 10),
-    breakInterval: parseInt ((<HTMLInputElement>document.querySelector("#breakInterval")).value, 10),
-    breakDuration:  parseInt ((<HTMLInputElement>document.querySelector("#breakDuration")).value, 10)
+    remindInterval: parseInt ((document.querySelector("#remindInterval") as HTMLInputElement).value, 10),
+    breakInterval: parseInt ((document.querySelector("#breakInterval") as HTMLInputElement).value, 10),
+    breakDuration:  parseInt ((document.querySelector("#breakDuration") as HTMLInputElement).value, 10),
+    notificationOnShortBreak: (document.querySelector("#soundOnShortBreak") as HTMLInputElement).checked as boolean,
+    notificationOnLongBreak: (document.querySelector("#soundOnLongBreak") as HTMLInputElement).checked as boolean
   }
   chrome.storage.local.set(newSettings, settingSavedCallback);
 }
@@ -44,6 +53,3 @@ function settingSavedCallback () {
 }
 
 document.addEventListener('DOMContentLoaded', loadOptions);
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelector("#settingsForm").addEventListener("submit", saveOptions);
-});
